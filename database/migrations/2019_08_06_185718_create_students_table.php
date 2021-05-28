@@ -97,7 +97,7 @@ class CreateStudentsTable extends Migration
             $table->foreign('guide_teacher_id')
                 ->references('id')
                 ->on('teachers')
-                ->onDelete('cascade');
+                ->onDelete('SET NULL');
             $table->foreign('school_program_id')
                 ->references('id')
                 ->on('school_programs')
