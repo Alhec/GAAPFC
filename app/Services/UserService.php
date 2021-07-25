@@ -178,6 +178,14 @@ class UserService
         }
         $user=$user->toArray();
         if (count($user)>0){
+            if ($userType == 'S'){
+                foreach ($user[0]['student'] as $student){
+                    $result = StudentService::removeAllInscriptionsByStudent($student['id'],$organizationId);
+                    if (is_numeric($result) && $result == 0){
+                        return response()->json(['message'=>self::taskError],500);
+                    }
+                }
+            }
             $usersRol = array_column($user[0]['roles'],'user_type');
             if (count($usersRol)==1){
                 $result=User::deleteUser($userId);

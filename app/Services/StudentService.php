@@ -13,6 +13,8 @@ use App\Equivalence;
 use App\FinalWork;
 use App\Log;
 use App\Roles;
+use App\SchoolPeriodStudent;
+use App\SchoolPeriodSubjectTeacher;
 use App\SchoolProgram;
 use App\Student;
 use App\StudentSubject;
@@ -543,6 +545,10 @@ class StudentService
             return response()->json(['message'=>self::notFoundUser],206);
         }
         if (count($user[0]['student'])>=2){
+            $result = self::removeAllInscriptionsByStudent($studentId,$organizationId);
+            if (is_numeric($result)&&$result == 0 ){
+                return response()->json(['message'=>self::taskError],500);
+            }
             $result = Student::deleteStudent($userId,$studentId);
             if (is_numeric($result)&&$result == 0 ){
                 return response()->json(['message'=>self::taskError],500);
@@ -560,7 +566,7 @@ class StudentService
     /**
      * Válida si los datos enviados por parámetros son del estudiante que realiza la petición o son de un usuario
      * administrador de lo contrario no estará autorizado.
-     * @param string $organizationId Objeto con los datos de la petición
+     * @param string $organizationId Id de la organiación
      * @param string $studentId id del estudiante
      * @return string|Response Devuelve un string valid si si es el estudiante coincide con su id de sesion o es usuario
      * administrador de lo contrario o de ocurrir un error devolvera un mensaje asociado
@@ -596,7 +602,7 @@ class StudentService
     /**
      * Lista todos los estudiantes que tienen algún tipo de incidencia con el método
      * Student::warningStudent($organizationId)
-     * @param string $organizationId Objeto con los datos de la petición
+     * @param string $organizationId Id de la organiación
      * @return Student|Response Devuelve una lista de estudiantes, con estatus diferentes a los regulares,de ocurrir un
      * error devolvera un mensaje asociado
      */
@@ -616,7 +622,7 @@ class StudentService
      * Actualiza los estudiantes a periodo de prueba si estos tienen un promedio por debajo de 14 y si cumplen con los
      * requisitos para presentar el trabajo especial de grado los cambia a habilitados con el método
      * Student::updateStudent($student['id'],$student->toArray())
-     * @param string $organizationId Objeto con los datos de la petición
+     * @param string $organizationId Id de la organiación
      * @return string|integer Actualiza los estudiantes que pasan a periodo de prueba y los que entran en requisitos
      * para presentar tesis
      */
@@ -670,5 +676,35 @@ class StudentService
             }
         }
         return 'emptyStudent';
+    }
+
+    /**
+     * Elimina todas las materias de un estudiante inscritas, y actualiza el contador de estudiantes inscritos en dichas
+     * materias inscritas.
+     * @param string $studentId id del estudiante
+     * @param string $organizationId Id de la organiación
+     * @return int Devuelve 0 en caso de error
+     */
+    public static function removeAllInscriptionsByStudent($studentId,$organizationId){
+        $inscriptions = SchoolPeriodStudent::getEnrolledSchoolPeriodsByStudent($studentId,$organizationId);
+        if (is_numeric($inscriptions)&&$inscriptions==0){
+            return 0;
+        }
+        $inscriptions=$inscriptions->toArray();
+        if (count($inscriptions)>0){
+            foreach ($inscriptions as $inscription){
+                foreach ($inscription['enrolled_subjects'] as $subject){
+                    $result = StudentSubject::deleteStudentSubject($subject['id']);
+                    if (is_numeric($result)&&$result==0){
+                        return 0;
+                    }
+                    $result = SchoolPeriodSubjectTeacher::updateEnrolledStudent(
+                        $subject['school_period_subject_teacher_id']);
+                    if (is_numeric($result)&&$result==0){
+                        return 0;
+                    }
+                }
+            }
+        }
     }
 }
