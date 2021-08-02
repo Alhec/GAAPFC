@@ -22,6 +22,14 @@ caso de ser necesario limpiar cache
 
 ####Servidor Local
 ```bash
+#librerias necesarias
+sudo apt install php-xml
+sudo apt install php7.4-gd
+sudo apt install php7.4-mbstring
+sudo apt install php-zip
+sudo apt install php7.4-xsl
+sudo apt-install php7.4-intl
+
 #Cargador de clases optimizado
 php artisan optimize
 composer dump-autolad
@@ -31,7 +39,6 @@ php artisan cache:clear
 
 #Borrar caché de ruta
 php artisan route:clear
-php artisan route:cache
 
 #Borrar vista de caché
 php artisan view:clear
@@ -55,6 +62,9 @@ Realizar los mismos pasos que en despliegue local hasta el penultimo comando
 
 [Guia de dockerizacion 2](https://www.digitalocean.com/community/tutorials/how-to-set-up-laravel-nginx-and-mysql-with-docker-compose)
 ```bash
+#Instalar dependencias
+composer install
+
 #Construye la imagen con el siguiente comando:
 docker-compose build app
 docker-compose build cron
