@@ -9,9 +9,9 @@
     "license": "MIT",
     "require": {
         "php": "^7.2",
-        "barryvdh/laravel-cors": "^0.11.3",
         "barryvdh/laravel-dompdf": "^0.8.5",
         "fideloper/proxy": "4.2.1",
+        "fruitcake/laravel-cors": "^2.0",
         "laravel/framework": "6.18.31",
         "laravel/tinker": "^1.0",
         "maatwebsite/excel": "^3.1",
