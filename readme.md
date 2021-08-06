@@ -113,7 +113,6 @@ se ubica en la carpeta collections llamadas
 [GAAPFC_Develop.postman_environment.json](./collections/GAAPFC_Develop.postman_environment.json)
 
 ## Autor
-}
 
 - [Héctor Alayón](mailto:hector.alayon@ciens.ucv.ve)
 

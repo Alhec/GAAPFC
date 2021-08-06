@@ -13,6 +13,7 @@ services:
     working_dir: /var/www/
     volumes:
       - ./:/var/www
+      - ./docker-compose/php/php.ini:/usr/local/etc/php/conf.d/php.ini
     networks:
       gaapfc:
         ipv4_address: 172.34.0.10
@@ -43,7 +44,7 @@ services:
       - 8000:80
     volumes:
       - ./:/var/www
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
+      - ./docker-compose/nginx/:/etc/nginx/conf.d/
     networks:
       gaapfc:
         ipv4_address: 172.34.0.30
