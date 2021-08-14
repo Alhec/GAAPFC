@@ -64,15 +64,15 @@ class AnnualReportService
         }
         $annualReport = new AnnualReport($schoolPeriodsToReport,$organizationId);
         if (ob_get_length() > 0) { ob_end_clean(); }
-        Excel::store($annualReport,'InformeAnual.xlsx');
+        /*Excel::store($annualReport,'InformeAnual.xlsx');
         $contents = Storage::get('InformeAnual.xlsx');
         $b64 = base64_encode($contents);
         Storage::delete('InformeAnual.xlsx');
         $response = [];
         $response['file']=$b64;
         $response['name']='InformeAnual.xlsx';
-
-        return $response;
+        return $response;*/
+        return Excel::download($annualReport,'InformeAnual.xlsx');
 
     }
 

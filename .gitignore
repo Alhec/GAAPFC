@@ -18,3 +18,4 @@ composer.lock
 .docs/*
 .phpdoc
 .phpdoc/*
+run/var

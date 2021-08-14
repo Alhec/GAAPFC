@@ -19,26 +19,26 @@ class OrganizationsTableSeeder extends Seeder
             'faculty_id'=>'CIENS',
             'website'=>'http://www.ciens.ucv.ve/ciens/geoquimica/'
         ]);
-        Organization::create([
+        /*Organization::create([
             'id'=>'C',
             'name'=>'Computacion',
             'faculty_id'=>'CIENS',
             'website'=>'http://www.ciens.ucv.ve/ciens/computacion/'
-        ]);
+        ]);*/
 
         Organization::create([
             'id'=>'ICT',
             'name'=>'Instituto de Ciencias de la Tierra',
             'faculty_id'=>'CIENS',
             'organization_id'=>'G',
-            'website'=>'localhost:3000'
+            'website'=>'http://gestiongeo.ciens.ucv.ve/'
         ]);
-        Organization::create([
+       /* Organization::create([
             'id'=>'B',
             'name'=>'Biologia',
             'faculty_id'=>'CIENS',
             'organization_id'=>'B',
             'website'=>'http://www.ciens.ucv.ve/biologia/'
-        ]);
+        ]);*/
     }
 }
