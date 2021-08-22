@@ -117,8 +117,12 @@
                         </tr>
                         <tr>
                             <th colspan="2">PROFESOR GUIA </th>
-                            <td colspan="4">{{$data['user_data']['guide_teacher']['user']['level_instruction']}}.
-                                {{$data['user_data']['guide_teacher']['user']['first_name']}} {{$data['user_data']['guide_teacher']['user']['first_surname']}}</td>
+                            @if($data['user_data']['guide_teacher'] != null)
+                                <td colspan="4">{{$data['user_data']['guide_teacher']['user']['level_instruction']}}.
+                                    {{$data['user_data']['guide_teacher']['user']['first_name']}} {{$data['user_data']['guide_teacher']['user']['first_surname']}}</td>
+                            @else
+                                <td colspan="4"> - </td>
+                            @endif
                             <th colspan="3">E-MAIL ESTUDIANTE</th>
                             <td colspan="5">{{$data['user_data']['user']['email'] }}</td>
                         </tr>
