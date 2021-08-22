@@ -36,7 +36,8 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'identification','first_name','second_name','first_surname','second_surname','telephone', 'mobile','work_phone',
-        'email','password','level_instruction','active','with_disabilities','sex','nationality', 'organization_id'
+        'email','password','level_instruction','active','with_disabilities','sex','nationality', 'organization_id',
+        'level_instruction_name',
     ];
 
     /**
@@ -286,7 +287,7 @@ class User extends Authenticatable implements JWTSubject
         try{
             return self::insertGetId($user->only('identification','first_name','second_name','first_surname',
                 'second_surname','telephone','mobile','work_phone','email', 'password','level_instruction',
-                'active', 'with_disabilities','sex','nationality','organization_id'));
+                'active', 'with_disabilities','sex','nationality','organization_id','level_instruction_name'));
         }catch (\Exception $e){
             DB::rollback();
             return 0;
