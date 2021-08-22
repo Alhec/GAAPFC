@@ -103,6 +103,7 @@ class UserService
      * *with_disabilities: boolean
      * *sex: requerido, máximo 1 y termina en M o F
      * *nationality: requerido, máximo 1  y termina en V o E
+     * *level_instruction_name: máximo 300
      * @param Request $request Objeto con los datos de la petición
      */
     public static function validate(Request $request)
@@ -121,6 +122,7 @@ class UserService
             'with_disabilities'=>'boolean',
             'sex'=>'required|max:1|ends_with:M,F',
             'nationality'=>'required|max:1|ends_with:V,E',
+            'level_instruction_name'=>'max:300',
         ]);
     }
 

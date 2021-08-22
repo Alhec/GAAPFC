@@ -1,57 +1,49 @@
-version: "3.7"
+version: '3.5'
+
 services:
-  app:
+  laravel-app:
     build:
+      context: '.'
       args:
-        user: halayon
-        uid: 1000
-      context: ./
+        uid: ${UID}
       dockerfile: Dockerfile
     image: gaapfc
     container_name: gaapfc-app
     restart: unless-stopped
-    working_dir: /var/www/
+    ports:
+      - ${HOST_PORT}:80
+    environment:
+      - APACHE_RUN_USER=#1000
+      - APACHE_RUN_GROUP=#1000
     volumes:
-      - ./:/var/www
+      - .:/var/www/html
     networks:
-      gaapfc:
-        ipv4_address: 172.34.0.10
+      backend:
+        ipv4_address: 172.35.0.10
+        aliases:
+          - app
 
   db:
     image: mysql:5.7
     container_name: gaapfc-db
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
     volumes:
       - dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=securerootpassword
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     networks:
-      gaapfc:
-        ipv4_address: 172.34.0.20
-
-  nginx:
-    image: nginx:1.15.2-alpine
-    container_name: gaapfc-nginx
-    restart: unless-stopped
-    working_dir: /var/www/
-    ports:
-      - 8000:80
-    volumes:
-      - ./:/var/www
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
-    networks:
-      gaapfc:
-        ipv4_address: 172.34.0.30
+      backend:
+        ipv4_address: 172.35.0.20
+        aliases:
+          - mysql-db
   cron:
     build:
       args:
         user: halayon
-        uid: 1000
+        uid:  ${UID}
       context: ./docker-compose/php/
       dockerfile: Dockerfile
     image: php-cron
@@ -62,14 +54,15 @@ services:
       - ./docker-compose/php/crontab:/etc/crontab:ro
     command: bash -c "/usr/bin/crontab /etc/crontab && /usr/sbin/cron -f"
     networks:
-      gaapfc:
-        ipv4_address: 172.34.0.40
+      backend:
+        ipv4_address: 172.35.0.40
+
 networks:
-  gaapfc:
+  backend:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.34.0.0/24
+        - subnet: 172.35.0.0/24
 volumes:
   dbdata:
     driver: local

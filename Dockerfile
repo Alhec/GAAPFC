@@ -1,36 +1,54 @@
-FROM php:7.4-fpm
+FROM php:7.2-apache
 
-# Arguments defined in docker-compose.yml
-ARG user
-ARG uid
-
-# Install system dependencies
+# 1. Install development packages and clean up apt cache.
 RUN apt-get update && apt-get install -y \
-    git \
     curl \
+    g++ \
+    git \
+    libbz2-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    libjpeg-dev \
+    libmcrypt-dev \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
+    libreadline-dev \
+    sudo \
     unzip \
-    default-mysql-client
+    zip \
+    libxml2-dev \
+ && rm -rf /var/lib/apt/lists/*
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# 2. Apache configs + document root.
+RUN echo "ServerName laravel-app.local" >> /etc/apache2/apache2.conf
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Get latest Composer
+# 3. mod_rewrite for URL rewrite and mod_headers for .htaccess extra headers like Access-Control-Allow-Origin-
+RUN a2enmod rewrite headers
+
+# 4. Start with base PHP config, then add extensions.
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+RUN docker-php-ext-install \
+    bcmath \
+    bz2 \
+    calendar \
+    iconv \
+    intl \
+    mbstring \
+    opcache \
+    pdo_mysql \
+    zip
+RUN docker-php-ext-install gd xml iconv
+# 5. Composer.
 COPY --from=composer:1.10.22 /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
-
-# Set working directory
-WORKDIR /var/www
-
-USER $user
-
+# 6. We need a user with the same UID/GID as the host user
+# so when we execute CLI commands, all the host file's permissions and ownership remain intact.
+# Otherwise commands from inside the container would create root-owned files and directories.
+ARG uid
+RUN useradd -G www-data,root -u $uid -d /home/devuser devuser
+RUN mkdir -p /home/devuser/.composer && \
+    chown -R devuser:devuser /home/devuser
