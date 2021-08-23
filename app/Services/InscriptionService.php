@@ -1201,6 +1201,10 @@ class InscriptionService
                 if (is_numeric($student)&&$student===0){
                     return self::taskError(false,false);
                 }
+                $schoolPeriod = SchoolPeriod::getSchoolPeriodById($request['school_period_id'],$organizationId);
+                if (is_numeric($schoolPeriod)&&$schoolPeriod===0){
+                    return self::taskError(false,false);
+                }
                 if (count($student)>0){
                     $request['status']=$student[0]['current_status'];
                     $request['test_period']=$student[0]['test_period'];
@@ -1208,6 +1212,7 @@ class InscriptionService
                         $request['status']!='DES-B'&&$request['status']!='ENDED'){
                         $availableSubjects = self::getAvailableSubjects($request['student_id'],
                             $request['school_period_id'], $organizationId, true);
+                        $usersRol = array_column(auth()->payload()['user']->roles,'user_type');
                         if (is_numeric($availableSubjects)){
                             if ($availableSubjects===0){
                                 return self::taskError(false,false);
@@ -1221,13 +1226,15 @@ class InscriptionService
                             if ($availableSubjects===3){
                                 return response()->json(['message'=>self::thereAreNotSubjectsAvailableToRegister],206);
                             }
-                            $usersRol = array_column(auth()->payload()['user']->roles,'user_type');
                             if ($availableSubjects===4 && !in_array('A',$usersRol)){
                                 return response()->json(['message'=>self::thereAreSchoolPeriodWithoutPaying],206);
                             }
                             if ($availableSubjects===5){
                                 return response()->json(['message'=>self::notFoundStudentGivenId],206);
                             }
+                        }
+                        if(in_array('A',$usersRol)&& strtotime($schoolPeriod->toArray()[0]['start_date'])<=strtotime(now()->toDateTimeString())){
+                            $request['inscription_date']=$schoolPeriod->toArray()[0]['inscription_start_date'];
                         }
                         $schoolPeriodStudentId=SchoolPeriodStudent::addSchoolPeriodStudent($request);
                         if (is_numeric($schoolPeriodStudentId)&&$schoolPeriodStudentId===0){

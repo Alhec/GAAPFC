@@ -176,7 +176,7 @@ class SchoolPeriodStudent extends Model
     public static function addSchoolPeriodStudent($schoolPeriodStudent){
         try{
             return self::insertGetId($schoolPeriodStudent->only('student_id','school_period_id','status','financing',
-                'financing_description','pay_ref','amount_paid','test_period'));
+                'financing_description','pay_ref','amount_paid','test_period','inscription_date'));
         }catch (\Exception $e){
             DB::rollback();
             return 0;
