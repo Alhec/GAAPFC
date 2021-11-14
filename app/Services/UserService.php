@@ -476,7 +476,7 @@ class UserService
         unset($user['administrator']);
         unset($user['teacher']);
         unset($user['student']);
-        $result = User::updateUserLikeArray(auth()->payload()['user']->id,$user);
+        $result = User::updateUserLikeArray($request['userId'],$user);
         if (is_numeric($result) && $result ==0){
             return response()->json(['message'=>self::taskError],500);
         }
