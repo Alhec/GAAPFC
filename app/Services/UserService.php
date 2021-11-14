@@ -455,6 +455,7 @@ class UserService
         }
         return response()->json(['message'=>self::ok],200);
     }
+
     /**
      * Resetea la clave del usuario que el administrador solicito con el método
      * User::updateUserLikeArray(auth()->payload()['user']->id,$user)
@@ -465,13 +466,13 @@ class UserService
      */
     public static function resetPassword(Request $request,$organizationId)
     {
-        $user=User::getUserByIdWithoutFilterRol($request['userId']->id,$organizationId);
+        $user=User::getUserByIdWithoutFilterRol($request['userId'],$organizationId);
         if (is_numeric($user)&&$user==0){
             return response()->json(['message'=>self::taskError],500);
         }
         $user=$user->toArray();
         $user=$user[0];
-        $user['password']=Hash::make($user[0]['identification']);
+        $user['password']=Hash::make($user['identification']);
         unset($user['administrator']);
         unset($user['teacher']);
         unset($user['student']);
