@@ -17,7 +17,7 @@ class RolesTableSeeder extends Seeder
             'user_id'=>1,
             'user_type'=>'A'
         ]);
-        Roles::create([
+        /*Roles::create([
             'user_id'=>2,
             'user_type'=>'A'
         ]);
@@ -108,6 +108,6 @@ class RolesTableSeeder extends Seeder
         Roles::create([
             'user_id'=>23,
             'user_type'=>'T'
-        ]);
+        ]);*/
     }
 }
