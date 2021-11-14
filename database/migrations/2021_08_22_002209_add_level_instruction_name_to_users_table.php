@@ -14,7 +14,7 @@ class AddLevelInstructionNameToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('level_instruction_name',300);
+            $table->string('level_instruction_name',300)->default("");
         });
     }
 
