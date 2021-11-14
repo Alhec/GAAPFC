@@ -36,6 +36,7 @@ class UserService
     const invalidCurrentPassword = 'Su clave actual esta errada';
     const busyCredential = 'Identificacion o Correo ya registrados';
     const logChangePassword = 'Realizo un cambio de contraseña';
+    const logResetPassword = 'Realizo un Reseteo de contraseña';
     const logChangeUserData = 'Realizo cambios en sus datos de usuario';
     const logDeleteUser = 'Elimino al usuario ';
     const logCreateUser = 'Creo al usuario ';
@@ -114,9 +115,9 @@ class UserService
             'second_name'=>'max:20',
             'first_surname'=>'required|max:20',
             'second_surname'=>'max:20',
-            'telephone'=>'max:15',
-            'mobile'=>'required|max:15',
-            'work_phone'=>'max:15',
+            'telephone'=>'max:25',
+            'mobile'=>'required|max:25',
+            'work_phone'=>'max:25',
             'email'=>'required|max:30|email',
             'level_instruction'=>'required|max:3|ends_with:TSU,TCM,Dr,Esp,Ing,MSc,Lic',
             'with_disabilities'=>'boolean',
@@ -449,6 +450,36 @@ class UserService
             return response()->json(['message'=>self::taskError],500);
         }
         $log = Log::addLog(auth()->payload()['user']->id,self::logChangePassword);
+        if (is_numeric($log) && $log==0){
+            return response()->json(['message'=>self::taskError],500);
+        }
+        return response()->json(['message'=>self::ok],200);
+    }
+    /**
+     * Resetea la clave del usuario que el administrador solicito con el método
+     * User::updateUserLikeArray(auth()->payload()['user']->id,$user)
+     * @param Request $request Objeto con los datos de la petición
+     * @param string $organizationId Id de la organiación
+     * @return Response de ocurrir un error devolvera un mensaje asociado, y si se realiza de manera correcta devolvera
+     * ok.
+     */
+    public static function resetPassword(Request $request,$organizationId)
+    {
+        $user=User::getUserByIdWithoutFilterRol($request['userId']->id,$organizationId);
+        if (is_numeric($user)&&$user==0){
+            return response()->json(['message'=>self::taskError],500);
+        }
+        $user=$user->toArray();
+        $user=$user[0];
+        $user['password']=Hash::make($user[0]['identification']);
+        unset($user['administrator']);
+        unset($user['teacher']);
+        unset($user['student']);
+        $result = User::updateUserLikeArray(auth()->payload()['user']->id,$user);
+        if (is_numeric($result) && $result ==0){
+            return response()->json(['message'=>self::taskError],500);
+        }
+        $log = Log::addLog(auth()->payload()['user']->id,self::logResetPassword);
         if (is_numeric($log) && $log==0){
             return response()->json(['message'=>self::taskError],500);
         }

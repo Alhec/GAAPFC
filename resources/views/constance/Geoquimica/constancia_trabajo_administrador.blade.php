@@ -89,13 +89,13 @@
                         Coordinadora
                     @endif
                     del  Postgrado  en  Geoquímica,  Facultad  de  Ciencias de  la Universidad   Central  de Venezuela,
-                    por  medio  de   la   presente   hace  constar  que el
+                    por  medio  de   la   presente   hace  constar  que
                     <strong>
                         @if($data['user_data']['administrator']['rol']=='COORDINATOR')
                             @if($data['user_data']['sex']=='M')
-                                Coordinador
+                                el Coordinador
                             @else
-                                Coordinadora
+                                la Coordinadora
                             @endif
                         @else
                             @if($data['user_data']['sex']=='M')

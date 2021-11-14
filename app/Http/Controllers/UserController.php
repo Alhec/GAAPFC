@@ -33,4 +33,15 @@ class UserController extends Controller
         $organizationId = $request->header('Organization-Key');
         return UserService::changeUserData($request,$organizationId);
     }
+
+    /**
+     * Usa el servicio UserService::changePassword($request,$organizationId) para cambiar la contraseña del usuario
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public static function resetPassword(Request $request)
+    {
+        $organizationId = $request->header('Organization-Key');
+        return UserService::resetPassword($request,$organizationId);
+    }
 }

@@ -34,6 +34,7 @@ Route::middleware('app.auth')->prefix('password')->group(function (){
 Route::middleware('app.auth','jwt.auth')->group(function (){
     Route::post('changePassword', 'UserController@changePassword');
     Route::post('updateUser', 'UserController@changeUserData');
+    Route::middleware('role:A')->post('resetPassword', 'UserController@resetPassword');
 });
 
 //Administrator
