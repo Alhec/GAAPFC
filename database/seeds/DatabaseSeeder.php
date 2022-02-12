@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
          $this->call(UsersTableSeeder::class);
          $this->call(RolesTableSeeder::class);
          $this->call(AdministratorsTableSeeder::class);
-         /*$this->call(TeachersTableSeeder::class);
+         $this->call(TeachersTableSeeder::class);
          $this->call(SchoolProgramsTableSeeder::class);
          $this->call(SubjectsTableSeeder::class);
          $this->call(SchoolProgramSubjectTableSeeder::class);
@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
          $this->call(FinalWorkTableSeeder::class);
          $this->call(FinalWorkSchoolPeriodTableSeeder::class);
          $this->call(AdvisorsTableSeeder::class);
-         $this->call(DoctoralExamTableSeeder::class);*/
+         $this->call(DoctoralExamTableSeeder::class);
         Schema::enableForeignKeyConstraints();
     }
 }

@@ -18,12 +18,12 @@ class AdministratorsTableSeeder extends Seeder
             'rol'=>'COORDINATOR',
             'principal'=>true
         ]);
-        /*Administrator::create([
+        Administrator::create([
             'id'=>2,
             'rol'=>'SECRETARY',
             'principal'=>false
         ]);
-        Administrator::create([
+       /* Administrator::create([
             'id'=>17,
             'rol'=>'COORDINATOR',
             'principal'=>true

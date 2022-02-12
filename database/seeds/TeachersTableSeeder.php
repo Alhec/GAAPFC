@@ -46,7 +46,7 @@ class TeachersTableSeeder extends Seeder
             'category'=>'AGR', //INS ASI AGR ASO TIT INV
             'dedication'=>'EXC'
         ]);
-        Teacher::create([
+        /*Teacher::create([
             'id'=>19,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'INS', //INS ASI AGR ASO TIT INV
@@ -75,6 +75,6 @@ class TeachersTableSeeder extends Seeder
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'AGR', //INS ASI AGR ASO TIT INV
             'dedication'=>'EXC'
-        ]);
+        ]);*/
     }
 }

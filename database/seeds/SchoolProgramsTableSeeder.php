@@ -48,7 +48,7 @@ class SchoolProgramsTableSeeder extends Seeder
             'organization_id'=>'ICT',
             'conducive_to_degree'=>false,
         ]);
-        SchoolProgram::create([
+        /*SchoolProgram::create([
             'school_program_name' => 'Especializacion',
             'num_cu' => 3,
             'organization_id'=>'C',
@@ -82,6 +82,6 @@ class SchoolProgramsTableSeeder extends Seeder
             'grant_certificate' => true,
             'organization_id'=>'C',
             'conducive_to_degree'=>false,
-        ]);
+        ]);*/
     }
 }

@@ -217,6 +217,32 @@ class SchoolPeriodService
     }
 
     /**
+     * Agrega asignaturas al periodo escolar dado su id con el metodo
+     * SchoolPeriodSubjectTeacher::addSchoolPeriodSubjectTeacher($subject).
+     * @param array $subjects: Array de la petición con las asignaturas que se asocian al periodo escolar
+     * @param integer $schoolPeriodId Id del periodo escolar asociado
+     * @return integer Devuelve el id de la relacion entre periodo escolar profesor y asignatura, en caso de existir un
+     * error devolvera 0.
+     */
+    public static function addNewSubjectInSchoolPeriod($subjects,$schoolPeriodId)
+    {
+        foreach ($subjects as $subject){
+            $subject['enrolled_students']=0;
+            $subject['school_period_id']=$schoolPeriodId;
+            $schoolPeriodSubjectTeacherId = SchoolPeriodSubjectTeacher::addSchoolPeriodSubjectTeacher($subject);
+            if ($schoolPeriodSubjectTeacherId==0){
+                return 0;
+            }
+            if (isset($subject['schedules'])){
+                $result = self::addSchedules($subject['schedules'],$schoolPeriodSubjectTeacherId);
+                if (is_numeric($result)&&$result==0){
+                    return 0;
+                }
+            }
+        }
+    }
+
+    /**
      * Agrega un periodo escolar con el método SchoolPeriod::addSchoolPeriod($request).
      * Nota: Se asume que las asignaturas de proyecto o trabajo especial de grado estarán habilitadas en todos los
      * periodos escolares de los programas que las tengan.
@@ -252,7 +278,7 @@ class SchoolPeriodService
                 if ($schoolPeriodId==0){
                     return response()->json(['message'=>self::taskError],500);
                 }
-                $result = self::addSubjectInSchoolPeriod($request['subjects'],$schoolPeriodId);
+                $result = self::addNewSubjectInSchoolPeriod($request['subjects'],$schoolPeriodId);
                 if (is_numeric($result)&&$result===0){
                     return response()->json(['message' => self::taskPartialError], 500);
                 }
