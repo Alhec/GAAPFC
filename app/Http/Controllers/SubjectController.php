@@ -5,22 +5,31 @@ namespace App\Http\Controllers;
 use App\Services\SubjectService;
 use Illuminate\Http\Request;
 
+/**
+ * @package : Controller
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class SubjectController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
+     * Obtiene todos las asignaturas asociadas a un programa escolar de una organización usa el método
+     * SubjectService::getSubjects($organizationId) o SubjectService::getSubjects($organizationId,$perPage) si usa
+     * paginación.
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-       $organizationId = $request->header('Organization-Key');
-       return SubjectService::getSubjects($organizationId);
+        $organizationId = $request->header('Organization-Key');
+        $perPage = $request->input('per_page');
+        return $perPage ? SubjectService::getSubjects($organizationId,$perPage) :
+            SubjectService::getSubjects($organizationId);
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
+     * Agrega una asignatura y la asocia a un programa escolar de una organización, usa el método
+     * SubjectService::addSubject($request,$organizationId).
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -31,9 +40,10 @@ class SubjectController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
+     * Devuelve los datos de una asignatura dado su id, usa el método
+     * SubjectService::getSubjectsById($id,$organizationId)
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function show($id, Request $request)
@@ -43,10 +53,10 @@ class SubjectController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
+     * Actualiza los datos de una asignatura usando el método
+     * SubjectService::updateSubject($request,$id,$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function update($id,Request $request)
@@ -56,10 +66,9 @@ class SubjectController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @param Request $request
+     * Elimina una asignatura dada su id usando el método SubjectService::deleteSubject($id,$organizationId).
+     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function destroy($id,Request $request)
@@ -68,14 +77,33 @@ class SubjectController extends Controller
        return SubjectService::deleteSubject($id,$organizationId);
     }
 
+    /**
+     * Devuelve las asignaturas asociadas al id del programa escolar usando el método
+     * SubjectService::getSubjectsBySchoolProgramId($id,$organizationId) o
+     * SubjectService::getSubjectsWithoutFinalWorks($organizationId,$perPage) si usa paginación.
+     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function getBySchoolProgram($id,Request $request){
         $organizationId = $request->header('Organization-Key');
-        return SubjectService::getSubjectsBySchoolProgramId($id,$organizationId);
+        $perPage = $request->input('per_page');
+        return $perPage ? SubjectService::getSubjectsBySchoolProgramId($id,$organizationId,$perPage) :
+            SubjectService::getSubjectsBySchoolProgramId($id,$organizationId);
     }
 
+    /**
+     * Obtiene todos las asignaturas asociadas a un programa escolar sin asignaturas finales ni proyectos de una
+     * organización usa el método SubjectService::getSubjectsWithoutFinalWorks($organizationId) o
+     * SubjectService::getSubjectsBySchoolProgramId($id,$organizationId,$perPage) si usa paginación.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function getSubjectsWithoutFinalWorks(Request $request)
     {
         $organizationId = $request->header('Organization-Key');
-        return SubjectService::getSubjectsWithoutFinalWorks($organizationId);
+        $perPage = $request->input('per_page');
+        return $perPage ? SubjectService::getSubjectsWithoutFinalWorks($organizationId,$perPage) :
+            SubjectService::getSubjectsWithoutFinalWorks($organizationId);
     }
 }

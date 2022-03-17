@@ -15,17 +15,38 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
+/**
+ * @package : Exports
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class ApprovedFinalWorks implements FromArray, WithStrictNullComparison, WithTitle,ShouldAutoSize
 {
+    /**
+     * Variable que contiene los periodos escolares
+     *
+     */
     protected $schoolPeriods;
+
+    /**
+     * Variable que contiene la organizacion
+     *
+     */
     protected $organizationId;
 
+    /**
+     * Constructor inicializando las variables protegidas
+     * @param array $schoolPeriods  Rango de periodos escolares a consultar
+     * @param string $organizationId Id de la organiación
+     */
     public function __construct($schoolPeriods,$organizationId)
     {
         $this->schoolPeriods = $schoolPeriods;
         $this->organizationId=$organizationId;
     }
     /**
+     * Hoja donde se presentan los trabajos especiales de grado que han sido aprobados en los periodos escolares
+     * consultados.
      * @return array
      */
     public function array(): array
@@ -35,6 +56,7 @@ class ApprovedFinalWorks implements FromArray, WithStrictNullComparison, WithTit
     }
 
     /**
+     * Titulo de la pestaña
      * @return string
      */
     public function title(): string

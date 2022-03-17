@@ -4,10 +4,25 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
+/**
+ * @package : Migration
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class CreatePasswordResetsTable extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar migración PasswordResets.
+     *
+     * Descripción: Solicitudes de recuperación de contraseña.
+     *
+     * Atributos:
+     *
+     * email: Email de recuperación | varchar(191) - String | indice - Longitud 191
+     *
+     * token: Token de recuperación | varchar(191) - String | Longitud 191
+     *
+     * created_at: Fecha de solicitud | timestamp
      *
      * @return void
      */
@@ -21,7 +36,7 @@ class CreatePasswordResetsTable extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir migración.
      *
      * @return void
      */

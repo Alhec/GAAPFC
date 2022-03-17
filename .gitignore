@@ -14,3 +14,8 @@ composer.lock
 .idea
 .idea/*
 .idea
+.docs
+.docs/*
+.phpdoc
+.phpdoc/*
+run/var

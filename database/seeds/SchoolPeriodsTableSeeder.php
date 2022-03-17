@@ -14,10 +14,10 @@ class SchoolPeriodsTableSeeder extends Seeder
         SchoolPeriod::query()->truncate();
         SchoolPeriod::create([
             'cod_school_period'=>'IV-2019',
-            'start_date'=>'2019-10-01',
-            'end_date'=>'2019-12-31',
-            'withdrawal_deadline'=>'2019-10-31',
-            'inscription_start_date'=>'2019-09-30',
+            'start_date'=>'2020-10-01',
+            'end_date'=>'2020-12-31',
+            'withdrawal_deadline'=>'2020-10-31',
+            'inscription_start_date'=>'2020-09-30',
             'inscription_visible'=>false,
             'organization_id'=>'ICT',
             'load_notes'=>false,
@@ -26,10 +26,10 @@ class SchoolPeriodsTableSeeder extends Seeder
         ]);
         SchoolPeriod::create([
             'cod_school_period'=>'I-2020',
-            'start_date'=>'2020-01-01',
-            'end_date'=>'2020-03-31',
-            'withdrawal_deadline'=>'2020-01-31',
-            'inscription_start_date'=>'2019-12-31',
+            'start_date'=>'2021-01-01',
+            'end_date'=>'2021-03-31',
+            'withdrawal_deadline'=>'2021-01-31',
+            'inscription_start_date'=>'2021-12-31',
             'inscription_visible'=>false,
             'organization_id'=>'ICT',
             'load_notes'=>false,
@@ -38,10 +38,10 @@ class SchoolPeriodsTableSeeder extends Seeder
         ]);
         SchoolPeriod::create([
             'cod_school_period'=>'II-2020',
-            'start_date'=>'2020-04-01',
-            'end_date'=>'2020-06-30',
-            'withdrawal_deadline'=>'2020-04-30',
-            'inscription_start_date'=>'2020-03-31',
+            'start_date'=>'2021-04-01',
+            'end_date'=>'2021-06-30',
+            'withdrawal_deadline'=>'2021-04-30',
+            'inscription_start_date'=>'2021-03-31',
             'inscription_visible'=>false,
             'organization_id'=>'ICT',
             'load_notes'=>false,
@@ -50,11 +50,11 @@ class SchoolPeriodsTableSeeder extends Seeder
         ]);
         SchoolPeriod::create([
             'cod_school_period'=>'III-2020',
-            'start_date'=>'2020-07-01',
-            'end_date'=>'2020-09-30',
+            'start_date'=>'2021-10-01',
+            'end_date'=>'2021-12-30',
             'withdrawal_deadline'=>'2020-07-30',
             'inscription_start_date'=>'2020-06-30',
-            'inscription_visible'=>false,
+            'inscription_visible'=>true,
             'organization_id'=>'ICT',
             'load_notes'=>false,
             'project_duty'=>3.4,

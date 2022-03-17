@@ -1,0 +1,3 @@
+* * * * * cd /var/www/ && '/usr/local/bin/php' 'artisan' schedule:run >> /dev/null 2>&1
+#* * * * * /usr/local/bin/php -r "file_put_contents(sys_get_temp_dir() . '/cron.log', date('Y-m-d H:i:s') . PHP_EOL, FILE_APPEND);"
+# Don't remove the empty line at the end of this file. It is required to run the cron job

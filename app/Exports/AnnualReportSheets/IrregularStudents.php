@@ -15,17 +15,39 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
+/**
+ * @package : Exports
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class IrregularStudents implements FromArray, WithStrictNullComparison, WithTitle,ShouldAutoSize
 {
+
+    /**
+     * Variable que contiene los periodos escolares
+     *
+     */
     protected $schoolPeriods;
+
+    /**
+     * Variable que contiene la organizacion
+     *
+     */
     protected $organizationId;
 
+    /**
+     * Constructor inicializando las variables protegidas
+     * @param array $schoolPeriods  Rango de periodos escolares a consultar
+     * @param string $organizationId Id de la organiación
+     */
     public function __construct($schoolPeriods,$organizationId)
     {
         $this->schoolPeriods = $schoolPeriods;
         $this->organizationId=$organizationId;
     }
     /**
+     * Hoja donde se presentan los estudiantes que han estado en un estatus diferente al regular en los periodos
+     * escolares a consultar.
      * @return array
      */
     public function array(): array
@@ -35,6 +57,7 @@ class IrregularStudents implements FromArray, WithStrictNullComparison, WithTitl
     }
 
     /**
+     * Titulo de la pestaña
      * @return string
      */
     public function title(): string

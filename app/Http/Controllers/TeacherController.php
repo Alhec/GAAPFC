@@ -6,22 +6,30 @@ use Illuminate\Http\Request;
 use App\Services\UserService;
 use App\Services\TeacherService;
 
+/**
+ * @package : Controller
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class TeacherController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
+     * Obtiene todos los usuarios de rol profesor de una organización usa el metodo
+     * UserService::getUsers('T',$organizationId) o UserService::getUsers('T',$organizationId,$perPage) si usa
+     * paginación.
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
         $organizationId = $request->header('Organization-Key');
-        return UserService::getUsers('T',$organizationId);
+        $perPage = $request->input('per_page');
+        return $perPage ? UserService::getUsers('T',$organizationId,$perPage) :
+            UserService::getUsers('T',$organizationId);
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
+     * Agrega un usuario profesor a una organización, usa el método TeacherService::addTeacher($request,$organizationId).
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -32,9 +40,10 @@ class TeacherController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
+     * Devuelve los datos de un usuario profesor dado un id, usa el método
+     * UserService::getUserById($id,'T',$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function show($id,Request $request)
@@ -44,10 +53,10 @@ class TeacherController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
+     * Actualiza los datos de un usuario profesor usando el método
+     * TeacherService::updateTeacher($request,$id,$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -57,9 +66,9 @@ class TeacherController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
+     * Elimina un usuario profesor dado su id usando el método UserService::deleteUser($id,'T',$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function destroy($id,Request $request)
@@ -68,9 +77,18 @@ class TeacherController extends Controller
         return UserService::deleteUser($id,'T',$organizationId);
     }
 
+    /**
+     * Devuelve los usuarios con rol profesor que estén en estatus activo usando el método
+     * UserService::activeUsers('T',$organizationId) o UserService::activeUsers('T',$organizationId,$perPage) si usa
+     * paginación.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function active(Request $request)
     {
         $organizationId = $request->header('Organization-Key');
-        return UserService::activeUsers('T',$organizationId);
+        $perPage = $request->input('per_page');
+        return $perPage ? UserService::activeUsers('T',$organizationId,$perPage) :
+            UserService::activeUsers('T',$organizationId);
     }
 }

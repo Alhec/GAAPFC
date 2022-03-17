@@ -10,6 +10,11 @@ use App\SchoolPeriodStudent;
 use App\Student;
 use Illuminate\Console\Command;
 
+/**
+ * @package : Commands
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class updateStatusStudentForNotRegistered extends Command
 {
     /**
@@ -45,6 +50,11 @@ class updateStatusStudentForNotRegistered extends Command
     const logUpdateStudent = 'Actualizo la entidad student para el usuario con id ';
     const statusDESB = ' a un estatus de DES-B';
 
+    /**
+     * Este comando se ejecuta automáticamente en un periodo mensual, para actualizar los estatus de los estudiantes que
+     * no se hayan inscrito a tiempo en el periodo escolar de sus respectivas organizaciones a un status de
+     * desincorporación tipo b.
+     */
     public function handle()
     {
         $organizations = Organization::getOrganizations();
@@ -52,8 +62,10 @@ class updateStatusStudentForNotRegistered extends Command
             foreach ($organizations->toArray() as $organization){
                 $schoolPeriod = SchoolPeriod::getCurrentSchoolPeriod($organization['id']);
                 if (!is_numeric($schoolPeriod) && count($schoolPeriod)>0){
-                    if (($schoolPeriod[0]['inscription_start_date']<=now())&&($schoolPeriod[0]['inscription_visible']==false)){
-                        $studentInscription=SchoolPeriodStudent::getSchoolPeriodStudentBySchoolPeriod($schoolPeriod[0]['id'],$organization['id']);
+                    if (($schoolPeriod[0]['inscription_start_date']<=now())&&
+                        ($schoolPeriod[0]['inscription_visible']==false)){
+                        $studentInscription=SchoolPeriodStudent::getSchoolPeriodStudentBySchoolPeriod(
+                            $schoolPeriod[0]['id'],$organization['id']);
                         if (!is_numeric($studentInscription)&&count($studentInscription)>0){
                             $allStudent = Student::getAllStudentToDegree($organization['id']);
                             if (!is_numeric($allStudent)&&count($allStudent)>0){

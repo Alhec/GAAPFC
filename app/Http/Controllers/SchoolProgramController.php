@@ -5,22 +5,31 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\SchoolProgramService;
 
+/**
+ * @package : Controller
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class SchoolProgramController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
+     * Obtiene todos los programas escolares de una organización usa el método
+     * SchoolProgramService::getSchoolProgram($organizationId) o
+     * SchoolProgramService::getSchoolProgram($organizationId,$perPage) si usa paginación.
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
         $organizationId = $request->header('Organization-Key');
-        return  SchoolProgramService::getSchoolProgram($organizationId);
+        $perPage = $request->input('per_page');
+        return  $perPage ? SchoolProgramService::getSchoolProgram($organizationId,$perPage) :
+            SchoolProgramService::getSchoolProgram($organizationId);
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
+     * Agrega un programa escolar a una organización, usa el método
+     * SchoolProgramService::addSchoolProgram($request,$organizationId).
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -31,9 +40,10 @@ class SchoolProgramController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
+     * Devuelve los datos de un programa escolar dado un id, usa el método
+     * SchoolProgramService::getSchoolProgramById( $id,$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function show($id, Request $request)
@@ -43,10 +53,10 @@ class SchoolProgramController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
+     * Actualiza los datos de un programa escolar usando el método
+     * SchoolProgramService::updateSchoolProgram($request,$id,$organizationId)
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function update($id,Request $request)
@@ -56,9 +66,10 @@ class SchoolProgramController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
+     * Elimina un programa escolar dado su id usando el método
+     * SchoolProgramService::deleteSchoolProgram($id,$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function destroy($id,Request $request)

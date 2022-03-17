@@ -17,64 +17,64 @@ class TeachersTableSeeder extends Seeder
 
         Teacher::query()->truncate();
         Teacher::create([
-            'id'=>3,
+            'id'=>1,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'INS', //INS ASI AGR ASO TIT INV
             'dedication'=>'EXC'
         ]);
         Teacher::create([
-            'id'=>4,
+            'id'=>3,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'TIT', //INS ASI AGR ASO TIT INV
             'dedication'=>'TC'
         ]);
         Teacher::create([
-            'id'=>5,
+            'id'=>4,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'INV', //INS ASI AGR ASO TIT INV
             'dedication'=>'CON'
         ]);
         Teacher::create([
-            'id'=>6,
+            'id'=>5,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'ASI', //INS ASI AGR ASO TIT INV
             'dedication'=>'MT'
         ]);
         Teacher::create([
-            'id'=>7,
+            'id'=>6,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'AGR', //INS ASI AGR ASO TIT INV
+            'dedication'=>'EXC'
+        ]);
+        /*Teacher::create([
+            'id'=>19,
+            'teacher_type'=>'CON', //CON JUB REG
+            'category'=>'INS', //INS ASI AGR ASO TIT INV
             'dedication'=>'EXC'
         ]);
         Teacher::create([
             'id'=>20,
             'teacher_type'=>'CON', //CON JUB REG
-            'category'=>'INS', //INS ASI AGR ASO TIT INV
-            'dedication'=>'EXC'
-        ]);
-        Teacher::create([
-            'id'=>21,
-            'teacher_type'=>'CON', //CON JUB REG
             'category'=>'TIT', //INS ASI AGR ASO TIT INV
             'dedication'=>'TC'
         ]);
         Teacher::create([
-            'id'=>22,
+            'id'=>21,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'INV', //INS ASI AGR ASO TIT INV
             'dedication'=>'CON'
         ]);
         Teacher::create([
-            'id'=>23,
+            'id'=>22,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'ASI', //INS ASI AGR ASO TIT INV
             'dedication'=>'MT'
         ]);
         Teacher::create([
-            'id'=>24,
+            'id'=>23,
             'teacher_type'=>'CON', //CON JUB REG
             'category'=>'AGR', //INS ASI AGR ASO TIT INV
             'dedication'=>'EXC'
-        ]);
+        ]);*/
     }
 }

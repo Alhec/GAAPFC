@@ -1,5 +1,5 @@
 {
-    "name": "GAAPFC",
+    "name": "gaapfc/gaapfc",
     "type": "project",
     "description": "Gestion Academica Administrativas para los Postgrados de la Facultad de Ciencias de la UCV.",
     "keywords": [
@@ -9,12 +9,13 @@
     "license": "MIT",
     "require": {
         "php": "^7.2",
-        "barryvdh/laravel-cors": "^0.11.3",
         "barryvdh/laravel-dompdf": "^0.8.5",
+        "doctrine/dbal": "2.*",
         "fideloper/proxy": "4.2.1",
+        "fruitcake/laravel-cors": "^2.0",
         "laravel/framework": "6.18.31",
         "laravel/tinker": "^1.0",
-        "maatwebsite/excel": "3.1.17",
+        "maatwebsite/excel": "3.1.25",
         "tymon/jwt-auth": "dev-develop"
     },
     "require-dev": {

@@ -2,10 +2,14 @@
 
 namespace App\Console;
 
-use App\SchoolPeriod;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+/**
+ * @package : Commands
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class Kernel extends ConsoleKernel
 {
     /**
@@ -14,7 +18,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\updateStatusStudentForNotRegistered::class,
+        Commands\DatabaseBackUp::class,
     ];
 
     /**
@@ -27,6 +32,8 @@ class Kernel extends ConsoleKernel
     {
          $schedule->command('update:status-student')
             ->monthly();
+        $schedule->command('database:backup')
+            ->weekly();
     }
 
     /**

@@ -16,18 +16,40 @@ use App\Exports\AnnualReportSheets\IrregularFinalWorks;
 use App\Exports\AnnualReportSheets\IrregularStudents;
 use App\Exports\AnnualReportSheets\NotConduciveToDegree;
 use App\Exports\AnnualReportSheets\TeachingGroup;
-use function Complex\negative;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-
+/**
+ * @package : Exports
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class AnnualReport implements  WithMultipleSheets
 {
 
+    /**
+     * Uso de recurso exportable
+     *
+     */
     use Exportable;
+
+    /**
+     * Variable que contiene los periodos escolares
+     *
+     */
     protected $schoolPeriods;
+
+    /**
+     * Variable que contiene la organizacion
+     *
+     */
     protected $organizationId;
 
+    /**
+     * Constructor inicializando las variables protegidas
+     * @param array $schoolPeriods  Rango de periodos escolares a consultar
+     * @param string $organizationId Id de la organiación
+     */
     public function __construct($schoolPeriods,$organizationId)
     {
         $this->schoolPeriods = $schoolPeriods;
@@ -35,6 +57,8 @@ class AnnualReport implements  WithMultipleSheets
     }
 
     /**
+     * Es el exportable que genera el excel con el contenido del informe anual, está compuesto por seis hojas que están
+     * dentro de la carpeta AnnualReportSheets
      * @return array
      */
     public function sheets(): array

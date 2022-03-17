@@ -211,11 +211,11 @@ class SchoolProgramSubjectTableSeeder extends Seeder
             'type'=>'OB',
             'subject_group'=>33
         ]);
-        SchoolProgramSubject::create([
+        SchoolProgramSubject::create([ //subject group 33
             'school_program_id'=>1,
             'subject_id'=>15,
             'type'=>'OB',
-            'subject_group'=>33
+            'subject_group'=>34
         ]);
         SchoolProgramSubject::create([
             'school_program_id'=>2,

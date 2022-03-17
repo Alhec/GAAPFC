@@ -15,20 +15,35 @@ use App\Subject;
 use App\User;
 use Carbon\Carbon;
 use Excel;
+use Illuminate\Support\Facades\Storage;
 
+/**
+ * @package : Services
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class AnnualReportService
 {
     const taskError = 'No se puede proceder con la tarea';
     const schoolPeriodsValid = 'Debe proporcionar periodos escolares validos';
     const dateSchoolPeriods = 'Debe proveer los periodos escolares de manera ascendente con respecto a las fechas';
 
+    /**
+     * Obtiene todos los periodos escolares que estén entre el primer y último periodo escolar dado, generando el
+     * reporte haciendo uso del método new AnnualReport($schoolPeriodsToReport,$organizationId) y
+     * Excel::download($annualReport,'InformeAnual.xlsx').
+     * @param integer $firstSchoolPeriodId Id del primer periodo escolar
+     * @param integer $lastSchoolPeriodId Id del último periodo escolar
+     * @param string $organizationId Id de la organización a consultar el usuario
+     * @return array|Excel|object Genera un reporte en excel asociado a los periodos escolares seleccionados
+     */
     public static function exportAnnualReport($firstSchoolPeriodId,$lastSchoolPeriodId,$organizationId)
     {
         $firstSchoolPeriod = SchoolPeriod::getSchoolPeriodById($firstSchoolPeriodId,$organizationId);
         $lastSchoolPeriod=SchoolPeriod::getSchoolPeriodById($lastSchoolPeriodId,$organizationId);
         if ((is_numeric($firstSchoolPeriod)&&$firstSchoolPeriod===0) ||
             (is_numeric($lastSchoolPeriod)&&$lastSchoolPeriod==0)){
-            return response()->json(['message' => self::taskError], 206);
+            return response()->json(['message'=>self::taskError],500);
         }
         if (count($firstSchoolPeriod)<1 || count($lastSchoolPeriod)<1){
             return response()->json(['message' => self::schoolPeriodsValid], 206);
@@ -38,7 +53,7 @@ class AnnualReportService
         }
         $schoolPeriods = SchoolPeriod::getSchoolPeriods($organizationId);
         if (is_numeric($schoolPeriods)&&$schoolPeriods===0){
-            return response()->json(['message' => self::taskError], 206);
+            return response()->json(['message'=>self::taskError],500);
         }
         $schoolPeriodsToReport = [];
         foreach ($schoolPeriods->toArray() as $schoolPeriod){
@@ -48,20 +63,50 @@ class AnnualReportService
             }
         }
         $annualReport = new AnnualReport($schoolPeriodsToReport,$organizationId);
+        if (ob_get_length() > 0) { ob_end_clean(); }
+        /*Excel::store($annualReport,'InformeAnual.xlsx');
+        $contents = Storage::get('InformeAnual.xlsx');
+        $b64 = base64_encode($contents);
+        Storage::delete('InformeAnual.xlsx');
+        $response = [];
+        $response['file']=$b64;
+        $response['name']='InformeAnual.xlsx';
+        return $response;*/
         return Excel::download($annualReport,'InformeAnual.xlsx');
+
     }
 
     //EnrolledStudents
+    /**
+     * Función usada con el usort para ordenar a los estudiantes por programa escolar.
+     * @param object $a primer parámetro
+     * @param object $b segundo parámetro
+     * @return array Lista ordenada
+     */
     public static function cmpSchoolProgramId($a, $b)
     {
         return strcmp($a["school_program_id"], $b["school_program_id"]);
     }
 
+    /**
+     * Función usada con el usort para ordenar los periodos escolares por fecha de inicio.
+     * @param object $a primer parámetro
+     * @param object $b segundo parámetro
+     * @return array Lista ordenada
+     */
     public static function cmpSchoolPeriodStartDate($a, $b)
     {
         return strcmp($a["start_date"], $b["start_date"]);
     }
 
+    /**
+     * Filtra a los estudiantes, dejando solo a los que cursaron alguna asignatura en el transcurso de los periodos
+     * escolares dados.
+     * @param array $students Array con elementos de tipo student que están en programas académicos conducentes a grado
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @return array Devuelve a los estudiantes que cursaron asignaturas dentro de los rangos de periodos escolares
+     * dados.
+     */
     public static function filterStudents($students,$schoolPeriods)
     {
         $firstSchoolPeriod = $schoolPeriods[0];
@@ -84,6 +129,12 @@ class AnnualReportService
         return $filterStudents;
     }
 
+    /**
+     * Obtiene el primer periodo escolar que inscribe un estudiante.
+     * @param array $schoolPeriods Array con los periodos escolares que curso un estudiante
+     * @param boolean $code Bandera para determinar si se quiere el código del periodo escolar o el objeto completo
+     * @return array|string Devuelve el primer periodo escolar que inscribio un estudiante en forma de string o objeto.
+     */
     public static function getFirstSchoolPeriod($schoolPeriods,$code)
     {
         if (count($schoolPeriods)>0){
@@ -101,6 +152,12 @@ class AnnualReportService
         return '';
     }
 
+    /**
+     * Obtiene el último periodo escolar que inscribe un estudiante.
+     * @param array $schoolPeriods Array con los periodos escolares que curso un estudiante
+     * @param boolean $code Bandera para determinar si se quiere el código del periodo escolar o el objeto completo
+     * @return array|string Devuelve el último periodo escolar que inscribio un estudiante en forma de string o objeto.
+     */
     public static function getLastSchoolPeriod($schoolPeriods,$code)
     {
         if (count($schoolPeriods)>0){
@@ -118,6 +175,13 @@ class AnnualReportService
         return '';
     }
 
+    /**
+     * Devuelve un arreglo con los datos de cuántas asignaturas ha inscrito un estudiante, cuántas aprobó y cuántas
+     * reprobó.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $schoolPeriodsEnrolled Periodos escolares que ha inscrito un estudiante
+     * @return array Devuelve un arreglo con los datos asociados a los creditos del estudiante
+     */
     public static function getDataEnrolledSchoolPeriods($schoolPeriods,$schoolPeriodsEnrolled)
     {
         $credits = [];
@@ -128,7 +192,8 @@ class AnnualReportService
                 foreach ($schoolPeriodsEnrolled as $schoolPeriod){
                     if ($schoolPeriodId == $schoolPeriod['school_period_id']){
                         foreach ($schoolPeriod['enrolled_subjects'] as $enrolledSubject){
-                            $amountCreditsEnrolled = $amountCreditsEnrolled + $enrolledSubject['data_subject']['subject']['uc'];
+                            $amountCreditsEnrolled = $amountCreditsEnrolled
+                                + $enrolledSubject['data_subject']['subject']['uc'];
                         }
                         break;
                     }
@@ -141,15 +206,18 @@ class AnnualReportService
                 foreach ($schoolPeriodsEnrolled as $schoolPeriod){
                     if ($schoolPeriodId == $schoolPeriod['school_period_id']){
                         foreach ($schoolPeriod['enrolled_subjects'] as $enrolledSubject){
-                            $amountCreditsEnrolled = $amountCreditsEnrolled + $enrolledSubject['data_subject']['subject']['uc'];
+                            $amountCreditsEnrolled = $amountCreditsEnrolled
+                                + $enrolledSubject['data_subject']['subject']['uc'];
                             if ($enrolledSubject['status']=='REP'){
-                                $amountCreditsWithdrawn = $amountCreditsWithdrawn + $enrolledSubject['data_subject']['subject']['uc'];
+                                $amountCreditsWithdrawn = $amountCreditsWithdrawn
+                                    + $enrolledSubject['data_subject']['subject']['uc'];
                             }
                         }
                         break;
                     }
                 }
-                $credits[]=$amountCreditsWithdrawn==$amountCreditsEnrolled&&$amountCreditsEnrolled!=0?'RETIRO TOTAL':$amountCreditsWithdrawn;
+                $credits[]=$amountCreditsWithdrawn==
+                $amountCreditsEnrolled&&$amountCreditsEnrolled!=0?'RETIRO TOTAL':$amountCreditsWithdrawn;
             }
             foreach ($schoolPeriodsId as $schoolPeriodId){
                 $amountCreditsApproved = 0;
@@ -157,7 +225,8 @@ class AnnualReportService
                     if ($schoolPeriodId == $schoolPeriod['school_period_id']){
                         foreach ($schoolPeriod['enrolled_subjects'] as $enrolledSubject){
                             if ($enrolledSubject['status']=='REP'){
-                                $amountCreditsApproved = $amountCreditsApproved + $enrolledSubject['data_subject']['subject']['uc'];
+                                $amountCreditsApproved = $amountCreditsApproved
+                                    + $enrolledSubject['data_subject']['subject']['uc'];
                             }
                         }
                         break;
@@ -175,6 +244,12 @@ class AnnualReportService
         return $credits;
     }
 
+    /**
+     * Devuelve un string de SÍ si existe un trabajo de grado, de lo contrario devolverá NO.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $schoolPeriodsEnrolled Periodos escolares que ha inscrito un estudiante
+     * @return string Devuelve Si si existe un finalWork de lo contrario sera NO
+     */
     public static function existFinalWork($schoolPeriods,$schoolPeriodsEnrolled)
     {
         $schoolPeriodsId = array_column($schoolPeriods,'id');
@@ -189,9 +264,15 @@ class AnnualReportService
                 }
             }
         }
-        Return 'NO';
+        return 'NO';
     }
 
+    /**
+     * Suma los aranceles que ha pagado el estudiante en los periodos escolares inscritos.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $schoolPeriodsEnrolled Periodos escolares que ha inscrito un estudiante
+     * @return string Devuelve la suma de las inscripciones de los periodos escolares a consultar.
+     */
     public static function amountCanceled($schoolPeriods,$schoolPeriodsEnrolled)
     {
         $amountCanceled = 0;
@@ -204,6 +285,14 @@ class AnnualReportService
         return $amountCanceled;
     }
 
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los estudiantes.
+     * @param array $schoolPrograms Array con programas escolares conducentes a grado, el tipo de dato de cada elemento
+     * es de schoolProgram
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $students Array con elementos de tipo student que están en programas académicos conducentes a grado.
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyByRowEnrolledStudents($schoolPrograms, $schoolPeriods, $students)
     {
         $body = [];
@@ -236,6 +325,12 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los estudiantes.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getEnrolledStudents($schoolPeriods,$organizationId){
         $sheetEnrolledStudents = [];
         usort($schoolPeriods,'self::cmpSchoolPeriodStartDate');
@@ -292,6 +387,14 @@ class AnnualReportService
     }
 
     //IrregularStudent
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los estudiantes que están en un estatus diferente al regular.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $students Array con elementos de tipo student que están en programas académicos conducentes a grado.
+     * @param array $schoolPrograms Array con programas escolares conducentes a grado, el tipo de dato de cada elemento
+     * es de schoolProgram
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyRowIrregularStudents($schoolPeriods,$students,$schoolPrograms){
         $last = end($schoolPeriods);
         $body = [];
@@ -341,6 +444,13 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los estudiantes que están en un estatus
+     * diferente al regular.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getIrregularStudents($schoolPeriods,$organizationId){
         $sheetIrregularStudents = [];
         usort($schoolPeriods,'self::cmpSchoolPeriodStartDate');
@@ -383,6 +493,12 @@ class AnnualReportService
     }
 
     //NotConduciveToDegree
+    /**
+     * Filtra los periodos escolares, dejando los que contienen asignaturas de programas no conducentes a grado en el.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param Subject|object $subjects Array con asignaturas que pertenecen a programas escolares no conducente a grados
+     * @return array Filtra los periodos escolares dejando los que contienen asignaturas no conducentes a grados.
+     */
     public static function filterSchoolPeriodsBySubjects($schoolPeriods,$subjects)
     {
         $subjectsId = array_column($subjects->toArray(),'id');
@@ -398,6 +514,14 @@ class AnnualReportService
         return $schoolPeriodsFilter;
     }
 
+    /**
+     * Verifica que la asignatura y el programa escolar están  asociados, de ser así devolverá true de lo contrario será
+     * false.
+     * @param integer $schoolProgramId Id del programa escolar
+     * @param Subject|object $subjects Array con asignaturas que pertenecen a programas escolares no conducente a grados
+     * @param integer $subjectId Id de la asignatura
+     * @return boolean Devolvera true si la asignatura y el programa escolar estan asociado
+     */
     public static function isSubjectAssociatedWithSchoolProgram($schoolProgramId,$subjects,$subjectId)
     {
         foreach ($subjects as $subject){
@@ -412,6 +536,15 @@ class AnnualReportService
         return false;
     }
 
+    /**
+     * Obtiene los contadores respectivo a la asignatura perteneciente al programa escolar categorizando los cursantes,
+     * finalizados y abandonados de la asignatura separándolos por sexo.
+     * @param integer $subjectId Id de la asignatura
+     * @param integer $schoolPeriodId Id del periodo escolar
+     * @param array $students Array de estudiantes que pertenecen a programas escolares no conducentes a grado
+     * @param integer $schoolProgramId Id del programa escolar
+     * @return array Devolvera los contadores de las asignaturas asociadas.
+     */
     public static function getRowCounters($subjectId,$schoolPeriodId,$students,$schoolProgramId)
     {
         $counters=[];
@@ -425,7 +558,8 @@ class AnnualReportService
         foreach ($students as $student){
             if (count($student['school_period'])>0 && $student['school_program_id']==$schoolProgramId){
                 foreach ($student['school_period'] as $schoolPeriod){
-                    if ($schoolPeriod['school_period_id']==$schoolPeriodId && count($schoolPeriod['enrolled_subjects'])>0){
+                    if ($schoolPeriod['school_period_id']==$schoolPeriodId &&
+                        count($schoolPeriod['enrolled_subjects'])>0){
                         foreach ($schoolPeriod['enrolled_subjects'] as $subject){
                             if ($subject['data_subject']['subject_id']==$subjectId){
                                 if ($student['user']['sex']=='M'){
@@ -453,6 +587,17 @@ class AnnualReportService
         return $counters;
     }
 
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los estudiantes que están en los programas no conducentes a
+     * grado.
+     * @param array $schoolPeriods  Array con los periodos escolares a consultar
+     * @param array $students Array con elementos de tipo student que están en programas académicos no conducentes a
+     * grado
+     * @param array $schoolPrograms Array con programas escolares conducentes a grado, el tipo de dato de cada elemento
+     * es de schoolProgram
+     * @param Subject|object $subjects Array con asignaturas que pertenecen a programas no conducentes a grado
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyRowNotConduciveToDegree($schoolPeriods,$students,$schoolPrograms,$subjects)
     {
         $body=[];
@@ -474,7 +619,8 @@ class AnnualReportService
             foreach ($schoolPeriods as $schoolPeriod){
                 foreach ($schoolPeriod['subjects'] as $subject){
                     $row = [];
-                    if (self::isSubjectAssociatedWithSchoolProgram($schoolProgram['id'],$subjects,$subject['subject_id'])){
+                    if (self::isSubjectAssociatedWithSchoolProgram($schoolProgram['id'],$subjects,
+                        $subject['subject_id'])){
                         $row[]=$subject['subject']['name'];
                         for ($j=0;$j<$i;$j++){
                             $row[]='';
@@ -483,7 +629,8 @@ class AnnualReportService
                         for ($j=$i+1;$j<count($schoolPrograms);$j++){
                             $row[]='';
                         }
-                        $rowCounters=self::getRowCounters($subject['subject_id'],$schoolPeriod['id'],$students,$schoolProgram['id']);
+                        $rowCounters=self::getRowCounters($subject['subject_id'],$schoolPeriod['id'],$students,
+                            $schoolProgram['id']);
                         $row[]=$rowCounters['cur_mas'];
                         $totalCounters['cur_mas']=$totalCounters['cur_mas'] + $rowCounters['cur_mas'];
                         $row[]=$rowCounters['cur_fem'];
@@ -534,6 +681,13 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los estudiantes que están en programas
+     * no conducentes a grado.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getNotConduciveToDegree($schoolPeriods,$organizationId)
     {
         $sheetNotConduciveToDegree = [];
@@ -578,11 +732,20 @@ class AnnualReportService
     }
 
     //IrregularFinalWorks
+    /**
+     * Verifica si el estudiante dependiendo del flag ha inscrito un proyecto o un trabajo especial de grado, de ser así
+     * devolverá true, de lo contrario será false.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $studentSchoolPeriods Períodos escolares que ha inscrito el estudiante
+     * @param boolean $isProject Flag para determinar si busco un proyecto o un trabajo especial de grado
+     * @return boolean Devuelve un booleano peguntando si el estudiante inscribio trabajo especial de grado o proyectos.
+     */
     public static function enrolledFinalWork($schoolPeriods, $studentSchoolPeriods, $isProject)
     {
         $schoolPeriodsId=array_column($schoolPeriods,'id');
         foreach ($studentSchoolPeriods as $schoolPeriod){
-            if (in_array($schoolPeriod['school_period_id'],$schoolPeriodsId)&&count($schoolPeriod['final_work_data'])>0){
+            if (in_array($schoolPeriod['school_period_id'],$schoolPeriodsId)&&
+                count($schoolPeriod['final_work_data'])>0){
                 foreach ($schoolPeriod['final_work_data'] as $finalWork){
                     if ($finalWork['final_work']['is_project']==$isProject){
                         return true;
@@ -593,6 +756,11 @@ class AnnualReportService
         return false;
     }
 
+    /**
+     * Busca la fecha en que el estudiante aprobó su proyecto.
+     * @param array $studentSchoolPeriods Períodos escolares que ha inscrito el estudiante
+     * @return string Devuelve una fecha en la que aprobo el estudiante el proyecto.
+     */
     public static function getDateApprovedProject($studentSchoolPeriods)
     {
         $projectId = 0;
@@ -614,6 +782,11 @@ class AnnualReportService
         return '';
     }
 
+    /**
+     * Devuelve la descripción de un proyecto, si esta no es null.
+     * @param array $studentSchoolPeriods Períodos escolares que ha inscrito el estudiante
+     * @return string Devuelve la descripcion del status del proyecto.
+     */
     public static function getDescriptionStatusProject($studentSchoolPeriods)
     {
         $description = '';
@@ -627,6 +800,12 @@ class AnnualReportService
         return $description;
     }
 
+    /**
+     * Cuenta la cantidad de créditos que ha aprobado un estudiante hasta el último periodo escolar a consultar.
+     * @param Student $student Objeto de tipo estudiante
+     * @param array $schoolPeriods  Array con los periodos escolares a consultar
+     * @return integer Cuenta los creditos aprobados hasta el ultimo semestre a consultar.
+     */
     public static function counterCreditsInStudent($student,$schoolPeriods)
     {
         $schoolPeriodEnd=end($schoolPeriods);
@@ -652,6 +831,16 @@ class AnnualReportService
         return $student['credits_granted']+$equivalences+$creditsInSchoolPeriods;
     }
 
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los trabajos de grado de estudiantes que están en excediendo el
+     * tiempo reglamentario para presentar el trabajo de grado y los estudiantes que tiene más de 24 créditos aprobados
+     * y no han inscrito proyecto
+     * @param array $schoolPrograms Array con programas escolares conducentes a grado, el tipo de dato de cada elemento
+     * es de schoolProgram
+     * @param array $schoolPeriods  Array con los periodos escolares a consultar
+     * @param array $students Array con elementos de tipo student que están en programas académicos conducentes a grado.
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyByRowIrregularFinalWorks($schoolPrograms, $schoolPeriods, $students)
     {
         $body = [];
@@ -715,6 +904,14 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los trabajos de grado de estudiantes que
+     * están en excediendo el tiempo reglamentario para presentar el trabajo de grado y los estudiantes que tiene más de
+     * 24 créditos aprobados y no han inscrito proyecto
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getIrregularFinalWorks($schoolPeriods,$organizationId){
         $sheetIrregularFinalWorks = [];
         usort($schoolPeriods,'self::cmpSchoolPeriodStartDate');
@@ -751,6 +948,12 @@ class AnnualReportService
     }
 
     //ApprovedFinalWorks
+    /**
+     * Obtiene el trabajo de grado que esté aprobado del estudiante en alguno de los periodos escolares dados
+     * @param array $studentSchoolPeriods Períodos escolares que ha inscrito el estudiante
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @return array Devuelve el trabajo de grado aprobado en el rango de los periodos escolares a consultar.
+     */
     public static function getApprovedFinalWork($studentSchoolPeriods,$schoolPeriods)
     {
         $schoolPeriodsId=array_column($schoolPeriods,'id');
@@ -766,6 +969,15 @@ class AnnualReportService
         return [];
     }
 
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los trabajos de grados aprobados en los periodos escolares
+     * dados.
+     * @param array $schoolPrograms Array con programas escolares conducentes a grado, el tipo de dato de cada elemento
+     * es de schoolProgram
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param array $students Array con elementos de tipo student que están en programas académicos conducentes a grado.
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyRowApprovedFinalWorks($schoolPrograms, $schoolPeriods, $students){
         $body = [];
         foreach ($students as $student){
@@ -813,6 +1025,13 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los trabajos de grados aprobados en los
+     * periodos escolares dados.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getApprovedFinalWorks($schoolPeriods,$organizationId)
     {
         $sheetApprovedFinalWorks = [];
@@ -851,6 +1070,11 @@ class AnnualReportService
     }
 
     //TeachingGroup
+    /**
+     * Filtra a los profesores excluyendo a los que están invitados.
+     * @param array $teachers Array con todos los profesores asociados a la organización
+     * @return array Devuelve un array con profesores con categoria diferente de invitado
+     */
     public  static function getTeachersWithoutINV($teachers){
         $filterTeachers=[];
         foreach ($teachers as $teacher){
@@ -861,6 +1085,13 @@ class AnnualReportService
         return $filterTeachers;
     }
 
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los profesores que dictaron clase en los periodos escolares
+     * dados.
+     * @param array $teachers Array con profesores sin incluir a los invitados
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyRowTeachingGroup($teachers, $schoolPeriods)
     {
         $body = [];
@@ -958,6 +1189,13 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los profesores que dictaron clase en los
+     * periodos escolares dados.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getTeachingGroup($schoolPeriods,$organizationId)
     {
         $sheetTeachingGroup = [];
@@ -992,7 +1230,12 @@ class AnnualReportService
         return $sheetTeachingGroup;
     }
 
-    //TeachingGroup
+    //TeachersINV
+    /**
+     * Filtra a los profesores excluyendo a los que no sean invitados.
+     * @param array $teachers Array con todos los profesores asociados a la organización
+     * @return array Devuelve un array con profesores con categoria de invitado
+     */
     public  static function getTeachersINV($teachers){
         $filterTeachers=[];
         foreach ($teachers as $teacher){
@@ -1003,6 +1246,13 @@ class AnnualReportService
         return $filterTeachers;
     }
 
+    /**
+     * Crea el cuerpo de la hoja asociada a los datos de los profesores que dictaron clase en los periodos escolares
+     * dados que son invitados.
+     * @param array $teachers Array con profesores sin incluir a los invitados
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @return array Devuelve el cuerpo de una hoja para el excel.
+     */
     public static function setBodyRowGuestTeachers($teachers, $schoolPeriods)
     {
         $body = [];
@@ -1049,6 +1299,13 @@ class AnnualReportService
         return $body;
     }
 
+    /**
+     * Crea la hoja con encabezados y cuerpo de la hoja asociada a los datos de los profesores que dictaron clase en los
+     * periodos escolares dados que son invitados.
+     * @param array $schoolPeriods Array con los periodos escolares a consultar
+     * @param string $organizationId Id de la organización
+     * @return array Devuelve una hoja para el excel con encabezado.
+     */
     public static function getGuestTeachers($schoolPeriods,$organizationId)
     {
         $sheetGuestTeachers = [];

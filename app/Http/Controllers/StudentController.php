@@ -6,23 +6,30 @@ use Illuminate\Http\Request;
 use App\Services\UserService;
 use App\Services\StudentService;
 
+/**
+ * @package : Controller
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class StudentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
+     * Obtiene todos los estudiantes de una organización usa el método UserService::getUsers('S',$organizationId) o
+     * UserService::getUsers('S',$organizationId,$perPage) si usa paginación.
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
         $organizationId = $request->header('Organization-Key');
-        return UserService::getUsers('S',$organizationId);
+        $perPage = $request->input('per_page');
+        return $perPage ? UserService::getUsers('S',$organizationId,$perPage) :
+            UserService::getUsers('S',$organizationId);
     }
 
-
     /**
-     * Store a newly created resource in storage.
-     *
+     * Agrega un usuario estudiante a una organización, usa el método
+     * StudentService::addNewStudent($request,$organizationId).
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -33,9 +40,10 @@ class StudentController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
+     * Devuelve los datos de un usuario estudiante dado un id, usa el método
+     * UserService::getUserById($id,'S',$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function show($id,Request $request)
@@ -44,12 +52,11 @@ class StudentController extends Controller
         return UserService::getUserById($id,'S',$organizationId);
     }
 
-
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
+     * Actualiza los datos de un usuario estudiante usando el método
+     * StudentService::updateStudent($request,$id,$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -59,9 +66,9 @@ class StudentController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
+     * Elimina un usuario estudiante dado su id usando el método UserService::deleteUser($id,'S',$organizationId).
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function destroy($id,Request $request)
@@ -70,18 +77,41 @@ class StudentController extends Controller
         return UserService::deleteUser($id,'S',$organizationId);
     }
 
+    /**
+     * Devuelve los usuarios con rol estudiante que estén en estatus activo usando el método
+     * UserService::activeUsers('S',$organizationId) o UserService::activeUsers('S',$organizationId,$perPage) si usa
+     * paginación.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function active(Request $request)
     {
         $organizationId = $request->header('Organization-Key');
-        return UserService::activeUsers('S',$organizationId);
+        $perPage = $request->input('per_page');
+        return $perPage ? UserService::activeUsers('S',$organizationId,$perPage) :
+            UserService::activeUsers('S',$organizationId);
     }
 
+    /**
+     * Agrega una entidad estudiante a un usuario con ese rol usando el servicio
+     * StudentService::addStudentContinue($request,$id,$organizationId).
+     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function addStudentToUser($id,Request $request)
     {
         $organizationId = $request->header('Organization-Key');
         return StudentService::addStudentContinue($request,$id,$organizationId);
     }
 
+    /**
+     * Elimina una entidad estudiante de un usuario con el servicio
+     * StudentService::deleteStudent($id,$studentId,$organizationId).
+     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function deleteStudent($id,Request $request)
     {
         $organizationId = $request->header('Organization-Key');
@@ -89,6 +119,12 @@ class StudentController extends Controller
         return StudentService::deleteStudent($id,$studentId,$organizationId);
     }
 
+    /**
+     * Lista todos los estudiantes que presentan alguna incidencia, o estatus diferente al regular usando el servicio
+     * StudentService::warningStudent($organizationId).
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function warningStudent(Request $request)
     {
         $organizationId = $request->header('Organization-Key');

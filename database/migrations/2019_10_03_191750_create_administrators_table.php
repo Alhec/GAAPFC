@@ -4,10 +4,25 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
+/**
+ * @package : Migration
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class CreateAdministratorsTable extends Migration
 {
     /**
-     * Run the migrations.
+     * Ejecutar migración Administrators.
+     *
+     * Descripción: Administradores en el sistema sobre una organización.
+     *
+     * Atributos:
+     *
+     * id: Id del usuario | bigint(20) unsigned | Clave Primaria -Clave foránea(users)(id)
+     *
+     * rol: Coordinador o secretario  | varchar(11) - String | Longitud 11
+     *
+     * principal: Coordinador principal | tinyint - Boolean | Default: false
      *
      * @return void
      */
@@ -27,7 +42,7 @@ class CreateAdministratorsTable extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Revertir migración.
      *
      * @return void
      */

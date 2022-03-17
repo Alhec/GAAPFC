@@ -12,8 +12,20 @@ use App\User;
 use App\Organization;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * @package : Services
+ * @author : Hector Alayon
+ * @version : 1.0
+ */
 class EmailService
 {
+    /**
+     * Envía correo de usuario creado a los usuarios que pertenecen a la organización con id ICT.
+     * @param integer $id Id del usuario
+     * @param string $userType Tipo de usuario
+     * @param string $organizationId Id de la organiación
+     * @return integer, de ocurrir un error devolvera un 0, del o contrario sera un 1.
+     */
     public static function createUserICT($id,$userType,$organizationId)
     {
         $user= User::getUserById($id,$userType,$organizationId);
@@ -28,7 +40,7 @@ class EmailService
         $organization=$organization[0];
         $data['name']=$user['first_name'];
         $data['organization']=$organizationId;
-        switch ($user['user_type']){
+        switch ($userType){
             case 'S':
                 $data['profile']='Estudiante';
                 break;
@@ -42,17 +54,26 @@ class EmailService
                 break;
         }
         $data['web']=$organization['website'];
-        Mail::send('email.Geoquimica.emailCreateUser',$data,function ($message) use ($user){
-            $message->to($user['email'], $user['first_name'])
-                ->subject('Usuario creado exitosamente');
-        });
-        if (Mail::failures()) {
+        try{
+            Mail::send('email.Geoquimica.emailCreateUser',$data,function ($message) use ($user){
+                $message->to($user['email'], $user['first_name'])
+                    ->subject('Usuario creado exitosamente');
+            });
+        }catch (\Exception $error){
             return 0;
-        }else{
-            return 1;
         }
+        return 1;
     }
 
+    /**
+     * Define que correo de creación de usuario se enviará de acuerdo a la organización, actualmente sólo está definido
+     * el de la organización con id ICT.
+     * @param integer $id Id del usuario
+     * @param string $organizationId Id de la organiación
+     * @param string $userType Tipo de usuario
+     * @return integer, de ocurrir un error devolvera un 0, del o contrario sera un 1 si es exitoxo y su etorno por
+     * defecto sera 0.
+     */
     public static function userCreate($id,$organizationId,$userType)
     {
         switch ($organizationId){
